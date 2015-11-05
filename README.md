@@ -20,7 +20,7 @@
   parking in no parking spaces.
 
 # Contributors : 
-  * Nishok
+  * Nishok Mohanasamy
   * Zhisong Ge
   * Krishna
 
