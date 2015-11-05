@@ -5,7 +5,7 @@ Javscript (node.js) based parking application
     Web based parking assistance.
 
 # Mission Statement:
-Develop a parking assist application purely using web based technologies such as HTML, css, Javascript and its open sourced frameworks such as node.js, bootstrap, jQuery, jQuery UI etc.
+    Develop a parking assist application purely using web based technologies such as HTML, css, Javascript and its open sourced frameworks such as node.js, bootstrap, jQuery, jQuery UI etc.
     
 # Summary:
   * Parking is a huge problem in most of the places, eventhough there are applications available in assisting, which is not sufficient. 
