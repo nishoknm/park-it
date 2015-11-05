@@ -1,5 +1,5 @@
 # Park-It
-Javscript (node.js) based parking application
+    Javscript (node.js) based parking application
 
 # Proposal:
     Web based parking assistance.
