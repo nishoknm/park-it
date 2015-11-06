@@ -1,0 +1,9 @@
+{
+    "name": "Google map demo - Park-It",
+    "version": "0.0.1",
+    "description": "Park-IT google map",
+    "dependencies": {
+        "express": "*"
+    },
+    "engine": "node 0.6.x"
+}
