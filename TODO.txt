@@ -1,0 +1,7 @@
+TODO:
+
+1.Get current location from web page.
+2.Give the user option to select a radius limit.
+3.Based on the radius limit, get the parking lots. (if no parking lot API available, try with parks as dummy data and pin them in maps).
+	3.1 try to get direction and navigations for the nearest entry.
+4.Check whether APIs are already available to get the parking lots and their spaces.
