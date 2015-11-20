@@ -1,0 +1,32 @@
+@import url(http://fonts.googleapis.com/css?family=Lato:300,400,700);
+@font-face {
+    font-weight: normal;
+    font-style: normal;
+    font-family: 'codropsicons';
+    src: url('../fonts/codropsicons/codropsicons.eot');
+    src: url('../fonts/codropsicons/codropsicons.eot?#iefix') format('embedded-opentype'), url('../fonts/codropsicons/codropsicons.woff') format('woff'), url('../fonts/codropsicons/codropsicons.ttf') format('truetype'), url('../fonts/codropsicons/codropsicons.svg#codropsicons') format('svg');
+}
+
+html,
+body {
+    background: #444;
+    color: #48a770;
+    font-weight: 300;
+    font-family: 'Lato', Calibri, Arial, sans-serif;
+}
+
+a {
+    text-decoration: none;
+    color: #48a770;
+    outline: none;
+}
+
+a:hover,
+a:focus {
+    color: #2c774b;
+    outline: none;
+}
+
+#map {
+    height: 100%;
+}

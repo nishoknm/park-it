@@ -1,0 +1,11 @@
+{
+    "availability": {
+        "trustabilityBitsDecoded": "",
+        "availabilityBitsDecoded": "",
+        "availabilityBits": "",
+        "parkingAggregateAvailabilityStates": [],
+        "trustabilityBits": "",
+        "parkingAggregateAvailabilityCounts": [],
+        "parkingAggregateIds": []
+    }
+}
