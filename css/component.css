@@ -60,7 +60,7 @@ body,
     right: 0;
     z-index: 100;
     visibility: hidden;
-    width: 300px;
+    width: 390px;
     height: 100%;
     background: #48a770;
     -webkit-transition: all 0.5s;
@@ -108,7 +108,7 @@ body,
 
 .st-menu ul li a {
     display: block;
-    padding: 1em 1em 1em 1.2em;
+    padding: 0.8em 0 1.2em 1.2em;
     outline: none;
     box-shadow: inset 0 -1px rgba(0, 0, 0, 0.2);
     color: #f3efe0;
@@ -116,6 +116,7 @@ body,
     text-shadow: 0 0 1px rgba(255, 255, 255, 0.1);
     letter-spacing: 1px;
     font-weight: 400;
+    font-size: 25px;
     -webkit-transition: background 0.3s, box-shadow 0.3s;
     transition: background 0.3s, box-shadow 0.3s;
 }
@@ -128,14 +129,15 @@ body,
     background: rgba(0, 0, 0, 0.2);
     box-shadow: inset 0 -1px rgba(0, 0, 0, 0);
     color: #fff;
+    cursor: pointer;
 }
 
 
 /* Effect 2: Reveal */
 
 .st-effect-2.st-menu-open .st-pusher {
-    -webkit-transform: translateX(-300px);
-    transform: translateX(-300px);
+    -webkit-transform: translateX(-390px);
+    transform: translateX(-390px);
 }
 
 .st-effect-2.st-menu {

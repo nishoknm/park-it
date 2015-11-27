@@ -2,29 +2,58 @@ var express = require("express"),
     app = express();
 var request = require('request');
 
-app.use(express.static(__dirname));
-app.get("/getData", function(req, res) {
-    var requestUrl = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=' + req.query.latitude + ',' + req.query.longitude + '&radius=' + req.query.radius + '&types=parking&key=AIzaSyC0t-qP46fEA1XERGV8YJN1-B9eszVEdRk';
-    var options = {
-        Host: 'maps.googleapis.com',
-        uri: requestUrl,
-        method: 'GET',
-    };
-    request(options, function(error, response, body) {
-        if (!error && response.statusCode == 200) {
-            if (typeof(body) == "string") body = JSON.parse(body);
-            console.log(body.status);
-            if (body.status == 'OK') {
-                res.send(body);
+require("mootools");
+
+var getDataRecursive = new Class({
+    Implements: [Chain, Events, Options],
+    options: {
+        results: []
+    },
+    initialize: function(lat, lon, rad, res) {
+        this.requestUrl = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=' + lat + ',' + lon + '&radius=' + rad + '&types=parking&key=AIzaSyC0t-qP46fEA1XERGV8YJN1-B9eszVEdRk';
+        this.res = res;
+    },
+    getResults: function() {
+        return this.options.results;
+    },
+    getData: function() {
+        console.log('fetching... ' + this.requestUrl);
+        request(this.requestUrl, this.callback.bind(this));
+    },
+    callback: function(error, response, body) {
+        var body = JSON.parse(body),
+            results = body.results;
+
+        if (error || body.error) {
+            this.dataCallback(error || body.error);
+        } else {
+            this.getResults().push(...results);
+            if (body.next_page_token) {
+                this.requestUrl = this.requestUrl + "&pagetoken=" + body.next_page_token;
+                console.log(body.next_page_token);
+                setTimeout(this.getData.bind(this), 2000);
             } else {
-                res.send(body.status);
+                body.results = this.getResults();
+                this.dataCallback(null, body);
             }
         }
-    });
+    },
+    dataCallback: function(err, body) {
+        if (err) this.res.send(err);
+        else {
+            this.res.send(body);
+        }
+    }
+});
+
+app.use(express.static(__dirname));
+app.get("/getData", function(req, res) {
+    var getDataRecursiveObj = new getDataRecursive(req.query.latitude, req.query.longitude, req.query.radius, res);
+    getDataRecursiveObj.getData();
 });
 app.get("/getAvailability", function(req, res) {
     var placeId = {
-        status : "ok",
+        status: "ok",
         "placeId": req.query.placeId
     };
     res.send(placeId);
@@ -56,7 +85,7 @@ app.get("/addPlaceToGoogle", function(req, res) {
             console.log(newData);
             console.log(typeof(body));
             if (body.status == 'OK') {
-                res.send("Added " + req.query.name);;
+                res.send("Added " + req.query.name + "\n PlaceID :"+body.place_id);;
             } else {
                 res.send(" Failed..!!! ");
             }

@@ -55,9 +55,13 @@ var availabilityStateEnum = {
 
 var ParkItPage = {};
 ParkItPage.parkitMap = null;
-ParkItPage.currentPosition = null;
 ParkItPage.currentRegion = null;
-ParkItPage.radius = 1800;
+ParkItPage.currentPosition = {
+    lat: 40.857611,
+    lng: -74.2024167
+};
+ParkItPage.radius = 2000;
+ParkItPage.rightPanel = null;
 ParkItPage.selectedMarker = null;
 ParkItPage.LAT = 40.857611;
 ParkItPage.LNG = -74.2024167;
@@ -68,7 +72,10 @@ ParkItPage.MaximumZoomLevel = 25;
 ParkItPage.defaultDetailsZoom = 16;
 ParkItPage.defaultRegionZoom = 13;
 ParkItPage.infoWindow = null;
+ParkItPage.directionsService = null;
+ParkItPage.directionsDisplay = null;
 ParkItPage.customEvents = null;
+ParkItPage.autocompleteMarker = null;
 ParkItPage.icons = {
     noStatusPt: 'Images/noStatus_pt.png',
     noStatus: 'Images/noStatus.png',
@@ -77,13 +84,36 @@ ParkItPage.icons = {
     hiAvail: 'Images/hiAvail.png'
 };
 ParkItPage.initialize = function() {
+    this.rightPanel = document.getElementById('right-panel');
+    this.autocompleteInput = document.getElementById('pac-input');
     this.infoWindow = new google.maps.InfoWindow();
+    this.directionsDisplay = new google.maps.DirectionsRenderer;
+    this.directionsService = new google.maps.DirectionsService;
+    this.autocompleteMarker = new google.maps.Marker({
+        map: this.parkitMap,
+        anchorPoint: new google.maps.Point(0, -29)
+    });
     this.customEvents = new CustomEvent();
 };
 ParkItPage.openInfoWindow = function(content, marker) {
     this.infoWindow.setContent(content);
     this.infoWindow.open(this.parkitMap, marker);
 };
+ParkItPage.calculateAndDisplayRoute = function(start, dest) {
+    this.directionsDisplay.setMap(this.parkitMap);
+    this.directionsDisplay.setPanel(this.rightPanel);
+    this.directionsService.route({
+        origin: start,
+        destination: dest,
+        travelMode: google.maps.TravelMode.DRIVING
+    }, (function(response, status) {
+        if (status === google.maps.DirectionsStatus.OK) {
+            this.directionsDisplay.setDirections(response);
+        } else {
+            window.alert('Directions request failed due to ' + status);
+        }
+    }).bind(this));
+}
 
 
 var Marker = {};
@@ -98,7 +128,9 @@ Marker = function() {
     this._availabilityState = availabilityStateEnum.noStatus;
 
     this.initialize = function() {
-        this._marker = new google.maps.Marker();
+        this._marker = new google.maps.Marker({
+            animation: google.maps.Animation.DROP
+        });
         if (arguments[0].place) this.setPlace(arguments[0].place);
         if (arguments[0].title) this.setTitle(arguments[0].title);
         if (arguments[0].icon) this.setIcon(arguments[0].icon);
@@ -109,6 +141,7 @@ Marker = function() {
             ParkItPage.selectedMarker = this;
             if (ParkItPage.ZoomLevel >= ParkItPage.defaultDetailsZoom) {
                 ParkItPage.openInfoWindow('<div style="text-align:center">' + this.getTitle() + '</div>', this._marker);
+                ParkItPage.calculateAndDisplayRoute(ParkItPage.currentPosition.lat + "," + ParkItPage.currentPosition.lng, this._place.geometry.location.lat + "," + this._place.geometry.location.lng);
             } else if (ParkItPage.ZoomLevel >= ParkItPage.defaultRegionZoom) {
                 ParkItPage.parkitMap.setZoom(ParkItPage.defaultDetailsZoom);
                 ParkItPage.parkitMap.setCenter(this.getPosition());
@@ -199,8 +232,6 @@ var ParkItRegion = new Class({
     options: {
         markers: []
     },
-    mapbounds: {},
-    map: {},
     initialize: function(pos, radius) {
         this.getRegionData(pos, radius);
     },
@@ -237,14 +268,15 @@ var ParkItRegion = new Class({
     },
     getMarkers: function() {
         return this.options.markers;
+    },
+    destroy: function() {
+        for (var i = 0; i < this.getMarkers().length; i++) {
+            this.getMarkers()[i]._marker.setMap(null);
+        }
     }
-})
+});
 
 function initMap() {
-    ParkItPage.currentPosition = {
-        lat: 40.857611,
-        lng: -74.2024167
-    };
 
     ParkItPage.parkitMap = new google.maps.Map(document.getElementById('map'), {
         center: ParkItPage.currentPosition,
@@ -252,6 +284,32 @@ function initMap() {
     });
 
     ParkItPage.initialize();
+
+    var autocomplete = new google.maps.places.Autocomplete(ParkItPage.autocompleteInput);
+    autocomplete.bindTo('bounds', ParkItPage.parkitMap);
+
+    autocomplete.addListener('place_changed', function() {
+        ParkItPage.infoWindow.close();
+        ParkItPage.autocompleteMarker.setVisible(false);
+        var place = autocomplete.getPlace();
+        if (!place.geometry) {
+            window.alert("Autocomplete's returned place contains no geometry");
+            return;
+        }
+
+        // If the place has a geometry, then present it on a map.
+        if (place.geometry.viewport) {
+            ParkItPage.parkitMap.fitBounds(place.geometry.viewport);
+        } else {
+            ParkItPage.currentPosition = place.geometry.location.toJSON();
+            ParkItPage.parkitMap.setCenter(place.geometry.location);
+            ParkItPage.parkitMap.setZoom(15);
+            loadParkItRegion(ParkItPage.currentPosition);
+        }
+        ParkItPage.autocompleteMarker.setPosition(place.geometry.location);
+        ParkItPage.autocompleteMarker.setVisible(true);
+        ParkItPage.openInfoWindow('<div style="text-align:center">' + place.name + '</div>', ParkItPage.autocompleteMarker);
+    });
 
     google.maps.event.addListener(ParkItPage.parkitMap, 'zoom_changed', function() {
         if (this.getZoom() < ParkItPage.MinimumZoomLevel) {
@@ -267,9 +325,31 @@ function initMap() {
         ParkItPage.customEvents.dispatch("viewport_change");
         return;
     });
-    loadParkItRegion();
+    callCurrentLocation();
 }
 
-function loadParkItRegion() {
-    ParkItPage.currentRegion = new ParkItRegion(ParkItPage.currentPosition, ParkItPage.radius);
+function callCurrentLocation() {
+    //Current location
+    navigator.geolocation.getCurrentPosition(function(pos) {
+        ParkItPage.currentPosition = {
+            lat: pos.coords.latitude,
+            lng: pos.coords.longitude
+        };
+        ParkItPage.autocompleteInput.value = null;
+        ParkItPage.autocompleteMarker.setPosition(ParkItPage.currentPosition);
+        ParkItPage.autocompleteMarker.setVisible(true);
+        ParkItPage.openInfoWindow('<div style="text-align:center">Your Current Location</div>', ParkItPage.autocompleteMarker);
+        loadParkItRegion(ParkItPage.currentPosition);
+    });
+}
+
+function loadParkItRegion(pos) {
+    if (ParkItPage.currentRegion) {
+        ParkItPage.directionsDisplay.setMap(null);
+        ParkItPage.directionsDisplay.setPanel(null)
+        ParkItPage.currentRegion.destroy();
+    }
+    pos = pos ? pos : ParkItPage.currentPosition;
+    ParkItPage.parkitMap.setCenter(pos);
+    ParkItPage.currentRegion = new ParkItRegion(pos, ParkItPage.radius);
 }

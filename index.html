@@ -30,10 +30,13 @@
         <nav class="st-menu st-effect-2" id="menu-2">
             <h2 class="icon icon-location">Park-It</h2>
             <ul>
-                <li><a class="icon icon-location" href="#">Location</a></li>
+                <li>
+                    <a class="icon icon-location" onclick="callCurrentLocation()">
+                        <input id="pac-input" class="controls" type="text" placeholder="Enter a location" onclick="event.stopPropagation();">
+                    </a>
+                </li>
             </ul>
-            <div>
-            </div>
+            <div id="right-panel"></div>
         </nav>
     </div>
     <script type="text/javascript" src="js/classie.js"></script>

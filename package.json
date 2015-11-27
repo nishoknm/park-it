@@ -4,7 +4,9 @@
     "description": "Park-IT google map",
     "dependencies": {
         "express": "*",
-        "require": "*"
+        "require": "*",
+        "mootools": "latest",
+        "request": "latest"
     },
     "engine": "node 0.6.x"
 }

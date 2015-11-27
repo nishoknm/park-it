@@ -30,3 +30,69 @@ a:focus {
 #map {
     height: 100%;
 }
+
+#right-panel {
+    font-family: 'Roboto', 'sans-serif';
+    line-height: 30px;
+    padding-left: 3px;
+    padding-right: 3px;
+}
+
+#right-panel select,
+#right-panel input {
+    font-size: 15px;
+}
+
+#right-panel select {
+    width: 100%;
+}
+
+#right-panel i {
+    font-size: 12px;
+}
+
+#right-panel {
+    width: 390px;
+    overflow: auto;
+    position: absolute;
+    bottom: 0px;
+    height:69%;
+}
+
+.adp-legal {
+    display: none;
+}
+
+.adp {
+    position: absolute;
+    bottom: 0px;
+    height: auto;
+    max-height: 650px;
+    overflow: auto;
+}
+
+.controls {
+    margin-top: 10px;
+    border: 1px solid transparent;
+    border-radius: 2px 0 0 2px;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    height: 32px;
+    outline: none;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+#pac-input {
+    background-color: #fff;
+    font-family: Roboto;
+    font-size: 15px;
+    font-weight: 300;
+    margin-left: 12px;
+    padding: 0 11px 0 13px;
+    text-overflow: ellipsis;
+    width: 280px;
+}
+
+#pac-input:focus {
+    border-color: #4d90fe;
+}
