@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Park-IT</title>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" href="/stylesheets/default.css" />
+    <link rel="stylesheet" type="text/css" href="/stylesheets/normalize.css" />
+    <link rel="stylesheet" type="text/css" href="/stylesheets/icons.css" />
+    <link rel="stylesheet" type="text/css" href="/stylesheets/component.css" />
+    <script src="/javascripts/modernizr.custom.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js" type="text/javascript"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/mootools/1.4.5/mootools-yui-compressed.js" type="text/javascript"></script>
+    <script type="text/javascript" src="/javascripts/parkit.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC0t-qP46fEA1XERGV8YJN1-B9eszVEdRk&signed_in=true&libraries=places&callback=initMap" async defer></script>
+</head>
+
+<body>
+    <div id="st-container" class="st-container">
+        <div class="st-pusher">
+            <div class="st-content">
+                <div id="st-trigger-effects">
+                    <div id="map"></div>
+                    <span id="span" class="dr-icon dr-icon-menu" data-effect="st-effect-2"></span>
+                </div>
+            </div>
+        </div>
+        <nav class="st-menu st-effect-2" id="menu-2">
+            <h2 class="icon icon-location">Park-It</h2>
+            <ul>
+                <li>
+                    <a class="icon icon-location" onclick="callCurrentLocation()">
+                        <input id="pac-input" class="controls" type="text" placeholder="Enter a location" onclick="event.stopPropagation();">
+                    </a>
+                </li>
+            </ul>
+            <div id="right-panel"></div>
+        </nav>
+    </div>
+    <script type="text/javascript" src="/javascripts/classie.js"></script>
+    <script type="text/javascript" src="/javascripts/sidebarEffects.js"></script>
+</body>
+
+</html>
