@@ -26,6 +26,7 @@ var getDataRecursive = new Class({
     },
     initialize: function (lat, lon, rad, res) {
         this.requestUrl = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=' + lat + ',' + lon + '&radius=' + rad + '&types=parking&key=AIzaSyC0t-qP46fEA1XERGV8YJN1-B9eszVEdRk';
+        this.url = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=' + lat + ',' + lon + '&radius=' + rad + '&types=parking&key=AIzaSyC0t-qP46fEA1XERGV8YJN1-B9eszVEdRk';
         this.res = res;
     },
     getResults: function () {
@@ -44,7 +45,7 @@ var getDataRecursive = new Class({
         } else {
             this.getResults().push(...results);
             if (body.next_page_token) {
-                this.requestUrl = this.requestUrl + "&pagetoken=" + body.next_page_token;
+                this.requestUrl = this.url + "&pagetoken=" + body.next_page_token;
                 console.log(body.next_page_token);
                 setTimeout(this.getData.bind(this), 2000);
             } else {
