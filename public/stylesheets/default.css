@@ -27,6 +27,14 @@ a:focus {
     outline: none;
 }
 
+tr:hover,
+tr:focus {
+    background: rgba(0, 0, 0, 0.2);
+    box-shadow: inset 0 -1px rgba(0, 0, 0, 0);
+    color: #fff;
+    cursor: pointer;
+}
+
 #map {
     height: 100%;
 }
@@ -56,19 +64,54 @@ a:focus {
     overflow: auto;
     position: absolute;
     bottom: 0px;
-    height:69%;
+    height: 69%;
 }
 
 .adp-legal {
     display: none;
 }
 
-.adp {
+.adp,
+#pDetails {
     position: absolute;
     bottom: 0px;
     height: auto;
     max-height: 650px;
     overflow: auto;
+}
+
+#pDetails table {
+    font-weight: 300;
+    color: #2c2c2c;
+}
+
+#pDetails tbody,
+#pDetails tr,
+#pDetails td {
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+#pDetails td {
+    border-top: 1px solid #cdcdcd;
+    margin: 0;
+    padding: .3em 3px;
+    vertical-align: top;
+    width: 250px;
+    color: rgba(0, 0, 0, 0.4);
+    text-shadow: 0 0 1px rgba(0, 0, 0, 0.1);
+}
+
+#pDetails td.second {
+    text-align: right;
+}
+
+#pDetails td.single {
+    text-align: center;
+}
+
+.inactive {
+    display: none;
 }
 
 .controls {

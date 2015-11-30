@@ -74,6 +74,7 @@ ParkItPage.defaultRegionZoom = 13;
 ParkItPage.infoWindow = null;
 ParkItPage.directionsService = null;
 ParkItPage.directionsDisplay = null;
+ParkItPage.distanceService = null;
 ParkItPage.customEvents = null;
 ParkItPage.autocompleteMarker = null;
 ParkItPage.icons = {
@@ -89,6 +90,7 @@ ParkItPage.initialize = function() {
     this.infoWindow = new google.maps.InfoWindow();
     this.directionsDisplay = new google.maps.DirectionsRenderer;
     this.directionsService = new google.maps.DirectionsService;
+    this.distanceService = new google.maps.DistanceMatrixService;
     this.autocompleteMarker = new google.maps.Marker({
         map: this.parkitMap,
         anchorPoint: new google.maps.Point(0, -29)
@@ -100,6 +102,7 @@ ParkItPage.openInfoWindow = function(content, marker) {
     this.infoWindow.open(this.parkitMap, marker);
 };
 ParkItPage.calculateAndDisplayRoute = function(start, dest) {
+    if (!$("#pDetails").hasClass("inactive")) $("#pDetails").toggleClass("inactive");
     this.directionsDisplay.setMap(this.parkitMap);
     this.directionsDisplay.setPanel(this.rightPanel);
     this.directionsService.route({
@@ -113,7 +116,42 @@ ParkItPage.calculateAndDisplayRoute = function(start, dest) {
             window.alert('Directions request failed due to ' + status);
         }
     }).bind(this));
-}
+};
+ParkItPage.displayParking = function() {
+    var curMarker = ParkItPage.selectedMarker;
+    ParkItPage.directionsDisplay.setPanel(null);
+    if ($("#pDetails").hasClass("inactive")) {
+        $("#pDetails").toggleClass("inactive");
+        $.ajax({
+            url: "/getPlaceDetails?placeId=" + curMarker.getPlace().place_id,
+            type: 'GET',
+            dataType: 'json',
+            success: function(data) {
+                var details = data.result;
+                curMarker.setDetails(details);
+                $("#lName").text(details.name);
+                $("#address").text(details.formatted_address);
+                $("#pNum").text(details.formatted_phone_number);
+                $("#tSpace").text(curMarker.getTotal());
+                $("#aSpace").text(curMarker.getAvail());
+            },
+            error: function(error) {
+                console.log(error);
+            }
+        });
+    } else {
+        var details = curMarker.getDetails();
+        $("#lName").text(details.name);
+        $("#address").text(details.formatted_address);
+        $("#pNum").text(details.formatted_phone_number);
+        $("#tSpace").text(curMarker.getTotal());
+        $("#aSpace").text(curMarker.getAvail());
+    }
+
+};
+ParkItPage.displayIndoorMap = function() {
+
+};
 
 
 var Marker = {};
@@ -121,8 +159,12 @@ Marker = function() {
     this._marker = null;
     this._position = null;
     this._place = null;
+    this._region = null;
+    this._details = null;
     this._formattedAddress = '';
     this._icon = '';
+    this._avail = 0;
+    this._total = 0;
     this._isOnMap = false;
     this._timer = null;
     this._availabilityState = availabilityStateEnum.noStatus;
@@ -135,13 +177,15 @@ Marker = function() {
         if (arguments[0].title) this.setTitle(arguments[0].title);
         if (arguments[0].icon) this.setIcon(arguments[0].icon);
         if (arguments[0].position) this.setPosition(arguments[0].position);
+        if (arguments[0].region) this.setRegion(arguments[0].region);
         this.setMap(ParkItPage.parkitMap);
 
         google.maps.event.addListener(this._marker, 'click', function() {
             ParkItPage.selectedMarker = this;
             if (ParkItPage.ZoomLevel >= ParkItPage.defaultDetailsZoom) {
-                ParkItPage.openInfoWindow('<div style="text-align:center">' + this.getTitle() + '</div>', this._marker);
-                ParkItPage.calculateAndDisplayRoute(ParkItPage.currentPosition.lat + "," + ParkItPage.currentPosition.lng, this._place.geometry.location.lat + "," + this._place.geometry.location.lng);
+                ParkItPage.openInfoWindow('<div style="text-align:center"><a onclick=\'ParkItPage.displayParking()\'>' + this.getTitle() + '</a></div>', this._marker);
+                ParkItPage.calculateAndDisplayRoute(ParkItPage.currentPosition.lat + "," + ParkItPage.currentPosition.lng, this.getPlace().geometry.location.lat + "," + this.getPlace().geometry.location.lng);
+                ParkItPage.currentRegion._forceMarker = this;
             } else if (ParkItPage.ZoomLevel >= ParkItPage.defaultRegionZoom) {
                 ParkItPage.parkitMap.setZoom(ParkItPage.defaultDetailsZoom);
                 ParkItPage.parkitMap.setCenter(this.getPosition());
@@ -162,7 +206,6 @@ Marker = function() {
             new google.maps.Size(48, 48),
             new google.maps.Point(0, 0),
             anchorPoint);
-
         this._marker.setIcon(newImage);
     };
     this.getIcon = function() {
@@ -181,6 +224,30 @@ Marker = function() {
     this.getTitle = function() {
         return this._marker.getTitle();
     };
+    this.setDetails = function(details) {
+        this._details = details;
+    };
+    this.getDetails = function() {
+        return this._details;
+    };
+    this.getRegion = function() {
+        return this._region;
+    };
+    this.setRegion = function(region) {
+        this._region = region;
+    };
+    this.getAvail = function() {
+        return this._avail;
+    };
+    this.setAvail = function(avail) {
+        this._avail = avail;
+    };
+    this.getTotal = function() {
+        return this._total;
+    };
+    this.setTotal = function(total) {
+        this._total = total;
+    };
     this.setPlace = function(place) {
         this._place = place;
     };
@@ -196,6 +263,9 @@ Marker = function() {
     this.setMap = function(map) {
         this._marker.setMap(map);
     };
+    this.getDistance = function() {
+        return this._place.distance.value;
+    };
     this.getAvailability = function() {
         if (ParkItPage.ZoomLevel > ParkItPage.defaultRegionZoom) {
             if (this._timer) window.clearTimeout(this.timer);
@@ -206,16 +276,24 @@ Marker = function() {
                 type: 'GET',
                 dataType: 'json',
                 success: function(data) {
-                    currentMarker.availabilityCallback(data.results, data.status);
+                    currentMarker.availabilityCallback(data.item, data.status);
                 },
                 error: function(error) {
-                    alert(error);
+                    console.log(error);
                 }
             });
         }
     };
-    this.availabilityCallback = function(results, status) {
-        this.setAvailability();
+    this.availabilityCallback = function(item, status) {
+        if (status === "ok") {
+            this._item = item;
+            this.setAvail(item.avail);
+            this.setTotal(item.total);
+            this.setAvailability();
+            if (this.isFinal) {
+                this.getRegion().computeBestAvailableDirection();
+            }
+        }
     };
     this.setAvailability = function() {
         if (ParkItPage.ZoomLevel > ParkItPage.defaultRegionZoom && ParkItPage.ZoomLevel < ParkItPage.defaultDetailsZoom) {
@@ -242,7 +320,15 @@ var ParkItRegion = new Class({
             type: 'GET',
             dataType: 'json',
             success: function(data) {
-                currentRegion.regionDataCallback(data.results, data.status);
+                var deferredObject = currentRegion.regionDataCallback(data.results, data.status);
+                deferredObject.done(function() {
+                    console.log("Got all markers");
+                    currentRegion.getMarkers().sort(function(a, b) {
+                        var aDis = a.getDistance();
+                        var bDis = b.getDistance();
+                        return ((aDis < bDis) ? -1 : ((aDis > bDis) ? 1 : 0));
+                    });
+                });
             },
             error: function(error) {
                 alert(error);
@@ -250,11 +336,39 @@ var ParkItRegion = new Class({
         });
     },
     regionDataCallback: function(results, status) {
+        var deferredObject = $.Deferred();
+        var finalB = false;
+        var currentRegion = this;
         if (status === google.maps.places.PlacesServiceStatus.OK) {
             for (var i = 0; i < results.length; i++) {
-                this.getMarkers().push(this.createMarker(results[i]));
+                result = results[i];
+                if (i == results.length - 1) finalB = true;
+                ParkItPage.distanceService.getDistanceMatrix({
+                    origins: [ParkItPage.currentPosition],
+                    destinations: [result.geometry.location],
+                    travelMode: google.maps.TravelMode.DRIVING,
+                    unitSystem: google.maps.UnitSystem.METRIC,
+                    avoidHighways: false,
+                    avoidTolls: false
+                }, this.distanceServiceCallback(result, deferredObject, finalB));
             }
         }
+        return deferredObject;
+    },
+    distanceServiceCallback: function(result, deferredObject, finalB) {
+        var currentRegion = this;
+        return function(response, status) {
+            if (status === google.maps.places.PlacesServiceStatus.OK) {
+                result.distance = response.rows[0].elements[0].distance;
+                result.duration = response.rows[0].elements[0].duration;
+                var marker = currentRegion.createMarker(result);
+                currentRegion.getMarkers().push(marker);
+                if (finalB) {
+                    marker.isFinal = true;
+                    deferredObject.resolve();
+                }
+            }
+        };
     },
     createMarker: function(place) {
         var placeLoc = place.geometry.location;
@@ -262,7 +376,8 @@ var ParkItRegion = new Class({
         marker.initialize({
             position: placeLoc,
             title: place.name,
-            place: place
+            place: place,
+            region: this
         });
         return marker;
     },
@@ -272,6 +387,18 @@ var ParkItRegion = new Class({
     destroy: function() {
         for (var i = 0; i < this.getMarkers().length; i++) {
             this.getMarkers()[i]._marker.setMap(null);
+        }
+    },
+    computeBestAvailableDirection: function() {
+        for (var i = 0; i < this.getMarkers().length; i++) {
+            var marker = this.getMarkers()[i];
+            if (!this._forceMarker && marker.getAvail() > 0) {
+                if (this._bestMarker != marker) {
+                    ParkItPage.calculateAndDisplayRoute(ParkItPage.currentPosition.lat + "," + ParkItPage.currentPosition.lng, marker.getPlace().geometry.location.lat + "," + marker.getPlace().geometry.location.lng);
+                    this._bestMarker = ParkItPage.selectedMarker = marker;
+                }
+                break;
+            }
         }
     }
 });
