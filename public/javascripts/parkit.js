@@ -268,7 +268,7 @@ Marker = function() {
     };
     this.getAvailability = function() {
         if (ParkItPage.ZoomLevel > ParkItPage.defaultRegionZoom) {
-            if (this._timer) window.clearTimeout(this.timer);
+            if (this._timer) window.clearTimeout(this._timer);
             this._timer = window.setTimeout(this.getAvailability.bind(this), 8 * 1000);
             var currentMarker = this;
             $.ajax({
@@ -302,6 +302,10 @@ Marker = function() {
             image = ParkItPage.icons[this._availabilityState.code];
         }
         this.setIcon(image);
+    };
+    this.destroy = function() {
+        if (this._timer) window.clearTimeout(this._timer);
+        this.getMarker().setMap(null);
     };
 }
 
@@ -386,7 +390,7 @@ var ParkItRegion = new Class({
     },
     destroy: function() {
         for (var i = 0; i < this.getMarkers().length; i++) {
-            this.getMarkers()[i]._marker.setMap(null);
+            this.getMarkers()[i].destroy();
         }
     },
     computeBestAvailableDirection: function() {
