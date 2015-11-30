@@ -296,6 +296,13 @@ Marker = function() {
         }
     };
     this.setAvailability = function() {
+        if (this.getAvail() <= 5) {
+            this._availabilityState = availabilityStateEnum.noAvail;
+        } else if (this.getAvail() < 10) {
+            this._availabilityState = availabilityStateEnum.someAvail;
+        } else if (this.getAvail() >= 10) {
+            this._availabilityState = availabilityStateEnum.highAvail;
+        }
         if (ParkItPage.ZoomLevel > ParkItPage.defaultRegionZoom && ParkItPage.ZoomLevel < ParkItPage.defaultDetailsZoom) {
             image = ParkItPage.icons["noStatusPt"];
         } else if (ParkItPage.ZoomLevel >= ParkItPage.defaultDetailsZoom) {
@@ -335,7 +342,7 @@ var ParkItRegion = new Class({
                 });
             },
             error: function(error) {
-                alert(error);
+                console.log(error);
             }
         });
     },
