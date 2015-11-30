@@ -83,6 +83,7 @@ tr:focus {
 #pDetails table {
     font-weight: 300;
     color: #2c2c2c;
+    font-size: 25px;
 }
 
 #pDetails tbody,
