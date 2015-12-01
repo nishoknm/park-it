@@ -1,6 +1,7 @@
 var express = require('express');
 var path = require('path');
 var routes = require('./routes/index');
+var indoorRoute = require('./routes/indoor');
 var app = express();
 
 // view engine setup
@@ -11,6 +12,7 @@ app.use(express.static(__dirname + '/views'));
 
 //route configuration
 app.use('/', routes);
+app.use('/indoor', indoorRoute);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

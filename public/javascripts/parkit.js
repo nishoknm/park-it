@@ -1,3 +1,35 @@
+var SVG = new Class({
+    //Constructor of SVG;
+    initialize: function(svg) {
+        this.svg = svg;
+        this.svgNS = "http://www.w3.org/2000/svg";
+    },
+    //draw a rectangle;
+    drawRectangle: function(id, x, y, w, h, fill, stroke, stroke_width) {
+        var myRect = document.createElementNS(this.svgNS, "rect");
+        myRect.setAttributeNS(null, "id", id);
+        myRect.setAttributeNS(null, "x", x);
+        myRect.setAttributeNS(null, "y", y);
+        myRect.setAttributeNS(null, "width", w);
+        myRect.setAttributeNS(null, "height", h);
+        myRect.setAttributeNS(null, "fill", fill);
+        myRect.setAttributeNS(null, "stroke", stroke);
+        myRect.setAttributeNS(null, "stroke-width", stroke_width);
+        this.svg.appendChild(myRect);
+    },
+    //draw a line
+    drawLine: function(id, x1, y1, x2, y2, stroke, stroke_width) {
+        var myLine = document.createElementNS(this.svgNS, "line");
+        myLine.setAttributeNS(null, "id", id);
+        myLine.setAttributeNS(null, "x1", x1);
+        myLine.setAttributeNS(null, "y1", y1);
+        myLine.setAttributeNS(null, "x2", x2);
+        myLine.setAttributeNS(null, "y2", y2);
+        myLine.setAttributeNS(null, "stroke", stroke);
+        myLine.setAttributeNS(null, "stroke-width", stroke_width);
+        this.svg.appendChild(myLine);
+    }
+});
 var CustomEvent = new Class({
     events: [],
     addEventlistener: function(a, b) {
@@ -150,7 +182,45 @@ ParkItPage.displayParking = function() {
 
 };
 ParkItPage.displayIndoorMap = function() {
+    $("#dialog").dialog({
+        modal: true,
+        show: "blind",
+        hide: "blind"
+    });
+    $.ajax({
+        url: "/indoor/parking-inner-map",
+        type: "GET",
+        dataType: 'json',
+        success: function(map_info) {
 
+            var mySvg = new SVG(document.getElementById('floor3'));
+            for (var i = 0; i < 19; i++) {
+                mySvg.drawRectangle("col" + 0 + "r" + i, 22, 71 + i * 20, 39, 18, "green", "none", 0);
+                mySvg.drawRectangle("col" + 5 + "r" + i, 459, 71 + i * 20, 39, 18, "green", "none", 0);
+            }
+
+            for (var i = 0; i < 20; i++) {
+                mySvg.drawLine(null, 20, 70 + i * 20, 20 + 40, 70 + i * 20, "black", 2);
+                mySvg.drawLine(null, 460, 70 + i * 20, 460 + 40, 70 + i * 20, "black", 2);
+            }
+
+            for (var i = 0; i < 13; i++) {
+                mySvg.drawRectangle("col" + 1 + "r" + i, 139, 141 + i * 20, 39, 18, "green", "none", 0);
+                mySvg.drawRectangle("col" + 2 + "r" + i, 182, 141 + i * 20, 39, 18, "green", "none", 0);
+                mySvg.drawRectangle("col" + 3 + "r" + i, 299, 141 + i * 20, 39, 18, "green", "none", 0);
+                mySvg.drawRectangle("col" + 4 + "r" + i, 342, 141 + i * 20, 39, 18, "green", "none", 0);
+            }
+
+            for (var i = 0; i < 14; i++) {
+                mySvg.drawLine(null, 140, 140 + i * 20, 140 + 80, 140 + i * 20, "black", 2);
+                mySvg.drawLine(null, 300, 140 + i * 20, 300 + 80, 140 + i * 20, "black", 2);
+            }
+
+        },
+        error: function(error) {
+            alert(error);
+        }
+    });
 };
 
 

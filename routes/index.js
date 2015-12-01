@@ -91,6 +91,18 @@ router.get("/addAvailability", function (req, res) {
         res.send(returndata);
     });
 });
+router.get("/updateAvailability", function (req, res) {
+    var availCollection = dbo.collection('availability');
+    availCollection.update(
+        {placeId: req.query.placeId},
+        {
+            $set: {
+                avail: parseInt(req.query.avail)
+            }
+        }
+    );
+    res.send("Update fired : " + req.query.placeId + " with avail:" + parseInt(req.query.avail));
+});
 router.get("/addPlaceToGoogle", function (req, res) {
     var requestUrl = 'https://maps.googleapis.com/maps/api/place/add/json?key=AIzaSyC0t-qP46fEA1XERGV8YJN1-B9eszVEdRk';
     var type = "parking";
@@ -163,7 +175,7 @@ router.get("/getPlaceDetails", function (req, res) {
             if (body.status == 'OK') {
                 res.send(body);
             } else {
-                res.send( body["status"]);
+                res.send(body["status"]);
             }
         }
     });
