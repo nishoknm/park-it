@@ -9,10 +9,8 @@
     <link rel="stylesheet" type="text/css" href="/stylesheets/normalize.css" />
     <link rel="stylesheet" type="text/css" href="/stylesheets/icons.css" />
     <link rel="stylesheet" type="text/css" href="/stylesheets/component.css" />
-    <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
     <script src="/javascripts/modernizr.custom.js"></script>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js" type="text/javascript"></script>
-    <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
     <script src="//ajax.googleapis.com/ajax/libs/mootools/1.4.5/mootools-yui-compressed.js" type="text/javascript"></script>
     <script type="text/javascript" src="/javascripts/parkit.js"></script>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC0t-qP46fEA1XERGV8YJN1-B9eszVEdRk&signed_in=true&libraries=places&callback=initMap" async defer></script>
@@ -70,14 +68,17 @@
             </div>
         </nav>
     </div>
-    <div id="dialog">
-        <svg height="600" width="530" id="floor3" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-            <polygon points="20,20 20,520 220,520 220,510 300,510 300,520
+    <div id="overlay">
+        <div>
+            <svg height="550" width="530" id="floor3" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                <polygon points="20,20 20,520 220,520 220,510 300,510 300,520
                  500,520 500,500 490,500 490,460 500,460
                   500,20 300,20 300,30 220,30 220,20" style="fill: #e6e6e6;stroke: black; stroke-width: 4" />
-            <line x1="180" y1="140" x2="180" y2="400" stroke="black" stroke-width="4"></line>
-            <line x1="340" y1="140" x2="340" y2="400" stroke="black" stroke-width="4"></line>
-        </svg>
+                <line x1="180" y1="140" x2="180" y2="400" stroke="black" stroke-width="4"></line>
+                <line x1="340" y1="140" x2="340" y2="400" stroke="black" stroke-width="4"></line>
+            </svg>
+            <span onclick="ParkItPage.indoorMapOverlayClose()">close</span>
+        </div>
     </div>
     <script type="text/javascript" src="/javascripts/classie.js"></script>
     <script type="text/javascript" src="/javascripts/sidebarEffects.js"></script>

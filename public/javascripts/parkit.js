@@ -181,12 +181,15 @@ ParkItPage.displayParking = function() {
     }
 
 };
+ParkItPage.indoorMapOverlayClose = function() {
+    this.indoorMapOverlay();
+};
+ParkItPage.indoorMapOverlay = function() {
+    el = document.getElementById("overlay");
+    el.style.visibility = (el.style.visibility == "visible") ? "hidden" : "visible";
+};
 ParkItPage.displayIndoorMap = function() {
-    $("#dialog").dialog({
-        modal: true,
-        show: "blind",
-        hide: "blind"
-    });
+    this.indoorMapOverlay();
     $.ajax({
         url: "/indoor/parking-inner-map",
         type: "GET",
