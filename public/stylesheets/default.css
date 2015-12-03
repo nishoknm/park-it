@@ -15,24 +15,23 @@ body {
     font-family: 'Lato', Calibri, Arial, sans-serif;
 }
 
-a {
-    text-decoration: none;
-    color: #48a770;
-    outline: none;
-}
-
-a:hover,
-a:focus {
-    color: #2c774b;
-    outline: none;
-}
-
 tr:hover,
 tr:focus {
     background: rgba(0, 0, 0, 0.2);
     box-shadow: inset 0 -1px rgba(0, 0, 0, 0);
     color: #fff;
     cursor: pointer;
+}
+
+.info:hover {
+    background: rgba(0, 0, 0, 0.4);
+    text-shadow: 0 0 1px rgba(0, 0, 0, 0.1);
+    color: white;
+    width: 247px;
+    height: 120px;
+    font-size: 2.3em;
+    font-weight: bolder;
+    vertical-align: middle;
 }
 
 #map {
@@ -155,11 +154,21 @@ tr:focus {
 #overlay div {
     width: 550px;
     margin: 100px auto;
-    background-color: #FFEBCD;
+    background-color: #48a770;
     padding: 15px;
     text-align: center;
 }
 
 #overlay span {
     text-align: right;
+}
+
+.close {
+    color: rgba(0, 0, 0, 0.4);
+    float: right;
+}
+
+.opacifymap {
+    -webkit-filter: opacity(.2);
+    filter: opacity(.2);
 }

@@ -144,6 +144,7 @@ ParkItPage.calculateAndDisplayRoute = function(start, dest) {
     }, (function(response, status) {
         if (status === google.maps.DirectionsStatus.OK) {
             this.directionsDisplay.setDirections(response);
+            window.openmenu();
         } else {
             window.alert('Directions request failed due to ' + status);
         }
@@ -166,6 +167,7 @@ ParkItPage.displayParking = function() {
                 $("#pNum").text(details.formatted_phone_number);
                 $("#tSpace").text(curMarker.getTotal());
                 $("#aSpace").text(curMarker.getAvail());
+                window.openmenu();
             },
             error: function(error) {
                 console.log(error);
@@ -178,18 +180,11 @@ ParkItPage.displayParking = function() {
         $("#pNum").text(details.formatted_phone_number);
         $("#tSpace").text(curMarker.getTotal());
         $("#aSpace").text(curMarker.getAvail());
+        window.openmenu();
     }
 
 };
-ParkItPage.indoorMapOverlayClose = function() {
-    this.indoorMapOverlay();
-};
-ParkItPage.indoorMapOverlay = function() {
-    el = document.getElementById("overlay");
-    el.style.visibility = (el.style.visibility == "visible") ? "hidden" : "visible";
-};
 ParkItPage.displayIndoorMap = function() {
-    this.indoorMapOverlay();
     $.ajax({
         url: "/indoor/parking-inner-map",
         type: "GET",
@@ -256,7 +251,7 @@ Marker = function() {
         google.maps.event.addListener(this._marker, 'click', function() {
             ParkItPage.selectedMarker = this;
             if (ParkItPage.ZoomLevel >= ParkItPage.defaultDetailsZoom) {
-                ParkItPage.openInfoWindow('<div style="text-align:center"><a onclick=\'ParkItPage.displayParking()\'>' + this.getTitle() + '</a></div>', this._marker);
+                ParkItPage.openInfoWindow('<div class="info" style="text-align:center" onclick=\'ParkItPage.displayParking()\'>' + this.getTitle() + '</div>', this._marker);
                 ParkItPage.calculateAndDisplayRoute(ParkItPage.currentPosition.lat + "," + ParkItPage.currentPosition.lng, this.getPlace().geometry.location.lat + "," + this.getPlace().geometry.location.lng);
                 ParkItPage.currentRegion._forceMarker = this;
             } else if (ParkItPage.ZoomLevel >= ParkItPage.defaultRegionZoom) {
@@ -519,7 +514,7 @@ function initMap() {
         }
         ParkItPage.autocompleteMarker.setPosition(place.geometry.location);
         ParkItPage.autocompleteMarker.setVisible(true);
-        ParkItPage.openInfoWindow('<div style="text-align:center">' + place.name + '</div>', ParkItPage.autocompleteMarker);
+        ParkItPage.openInfoWindow('<div class="info" style="text-align:center">' + place.name + '</div>', ParkItPage.autocompleteMarker);
     });
 
     google.maps.event.addListener(ParkItPage.parkitMap, 'zoom_changed', function() {
@@ -549,7 +544,7 @@ function callCurrentLocation() {
         ParkItPage.autocompleteInput.value = null;
         ParkItPage.autocompleteMarker.setPosition(ParkItPage.currentPosition);
         ParkItPage.autocompleteMarker.setVisible(true);
-        ParkItPage.openInfoWindow('<div style="text-align:center">Your Current Location</div>', ParkItPage.autocompleteMarker);
+        ParkItPage.openInfoWindow('<div class="info" style="text-align:center">Your Current Location</div>', ParkItPage.autocompleteMarker);
         loadParkItRegion(ParkItPage.currentPosition);
     });
 }

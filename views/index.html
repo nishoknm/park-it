@@ -9,7 +9,6 @@
     <link rel="stylesheet" type="text/css" href="/stylesheets/normalize.css" />
     <link rel="stylesheet" type="text/css" href="/stylesheets/icons.css" />
     <link rel="stylesheet" type="text/css" href="/stylesheets/component.css" />
-    <script src="/javascripts/modernizr.custom.js"></script>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js" type="text/javascript"></script>
     <script src="//ajax.googleapis.com/ajax/libs/mootools/1.4.5/mootools-yui-compressed.js" type="text/javascript"></script>
     <script type="text/javascript" src="/javascripts/parkit.js"></script>
@@ -17,6 +16,17 @@
 </head>
 
 <body>
+    <div class="md-modal md-effect-18" id="modal-18">
+        <div class="md-content">
+            <svg height="550" width="530" id="floor3" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                <polygon points="20,20 20,520 220,520 220,510 300,510 300,520
+                 500,520 500,500 490,500 490,460 500,460
+                  500,20 300,20 300,30 220,30 220,20" style="fill: #e6e6e6;stroke: black; stroke-width: 4" />
+                <line x1="180" y1="140" x2="180" y2="400" stroke="black" stroke-width="4"></line>
+                <line x1="340" y1="140" x2="340" y2="400" stroke="black" stroke-width="4"></line>
+            </svg>
+        </div>
+    </div>
     <div id="st-container" class="st-container">
         <div class="st-pusher">
             <div class="st-content">
@@ -27,7 +37,7 @@
             </div>
         </div>
         <nav class="st-menu st-effect-2" id="menu-2">
-            <h2 class="icon icon-location">Park-It</h2>
+            <h2 class="icon icon-paypal">Park-It</h2>
             <ul>
                 <li>
                     <a class="icon icon-location" onclick="callCurrentLocation()">
@@ -40,27 +50,27 @@
                     <table>
                         <tbody>
                             <tr>
-                                <td>Lot Name:</td>
+                                <td class="icon icon-newspaper">Lot Name</td>
                                 <td id="lName" class="second"></td>
                             </tr>
                             <tr>
-                                <td>Address:</td>
+                                <td class="icon icon-office">Address</td>
                                 <td id="address" class="second"></td>
                             </tr>
                             <tr>
-                                <td>Phone Number:</td>
+                                <td class="icon icon-phone">Phone</td>
                                 <td id="pNum" class="second"></td>
                             </tr>
                             <tr>
-                                <td>Total Space:</td>
+                                <td class="icon icon-database">Total Space</td>
                                 <td id="tSpace" class="second"></td>
                             </tr>
                             <tr>
-                                <td>Availability:</td>
+                                <td class="icon icon-stack">Availability</td>
                                 <td id="aSpace" class="second"></td>
                             </tr>
                             <tr>
-                                <td class="single" colspan="2" onclick="ParkItPage.displayIndoorMap()">INDOOR MAP</td>
+                                <td class="single icon icon-map md-trigger md-setperspective" colspan="2" data-modal="modal-18" onclick="ParkItPage.displayIndoorMap()">INDOOR MAP</td>
                             </tr>
                         </tbody>
                     </table>
@@ -68,20 +78,10 @@
             </div>
         </nav>
     </div>
-    <div id="overlay">
-        <div>
-            <svg height="550" width="530" id="floor3" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-                <polygon points="20,20 20,520 220,520 220,510 300,510 300,520
-                 500,520 500,500 490,500 490,460 500,460
-                  500,20 300,20 300,30 220,30 220,20" style="fill: #e6e6e6;stroke: black; stroke-width: 4" />
-                <line x1="180" y1="140" x2="180" y2="400" stroke="black" stroke-width="4"></line>
-                <line x1="340" y1="140" x2="340" y2="400" stroke="black" stroke-width="4"></line>
-            </svg>
-            <span onclick="ParkItPage.indoorMapOverlayClose()">close</span>
-        </div>
-    </div>
+    <div class="md-overlay"></div>
     <script type="text/javascript" src="/javascripts/classie.js"></script>
     <script type="text/javascript" src="/javascripts/sidebarEffects.js"></script>
+    <script type="text/javascript" src="/javascripts/modalEffects.js"></script>
 </body>
 
 </html>
