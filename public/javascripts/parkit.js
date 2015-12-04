@@ -62,6 +62,7 @@ var CustomEvent = new Class({
     }
 });
 
+//Enum used to map the icon based on availability
 var availabilityStateEnum = {
     noStatus: {
         value: 0,
@@ -85,6 +86,7 @@ var availabilityStateEnum = {
     }
 };
 
+//ParkItPage holds standalone functions
 var ParkItPage = {};
 ParkItPage.parkitMap = null;
 ParkItPage.currentRegion = null;
@@ -116,6 +118,7 @@ ParkItPage.icons = {
     someAvail: 'Images/loAvail.png',
     hiAvail: 'Images/hiAvail.png'
 };
+//Constructor which initializes infowindow, directionService distance service etc from googlemaps
 ParkItPage.initialize = function() {
     this.rightPanel = document.getElementById('right-panel');
     this.autocompleteInput = document.getElementById('pac-input');
@@ -129,10 +132,20 @@ ParkItPage.initialize = function() {
     });
     this.customEvents = new CustomEvent();
 };
+/*
+Opens an info box on the marker
+Param:content - content html string to be loaded within infobox
+Param:marker - marker on which the info box has to be displayed
+*/
 ParkItPage.openInfoWindow = function(content, marker) {
     this.infoWindow.setContent(content);
     this.infoWindow.open(this.parkitMap, marker);
 };
+/*
+Computes the direction and displays the route using googlemap's direction and display service
+Param:start - orgin
+Param:dest - destination
+*/
 ParkItPage.calculateAndDisplayRoute = function(start, dest) {
     if (!$("#pDetails").hasClass("inactive")) $("#pDetails").toggleClass("inactive");
     this.directionsDisplay.setMap(this.parkitMap);
@@ -150,6 +163,10 @@ ParkItPage.calculateAndDisplayRoute = function(start, dest) {
         }
     }).bind(this));
 };
+/*
+Fetches and displays parking slot's information into Park-It menu
+This API will work only if there is a selected marker(Parking slot)
+*/
 ParkItPage.displayParking = function() {
     var curMarker = ParkItPage.selectedMarker;
     ParkItPage.directionsDisplay.setPanel(null);
@@ -184,6 +201,10 @@ ParkItPage.displayParking = function() {
     }
 
 };
+/*
+Handler invoked when opening indoorMap on selected marker(Parking slot) which creates the SVG component
+for indoor map only once and updates the slots from availabity status
+*/
 ParkItPage.displayIndoorMap = function() {
     var curMarker = ParkItPage.selectedMarker;
     if (!ParkItPage.mySvg) {
@@ -210,11 +231,16 @@ ParkItPage.displayIndoorMap = function() {
     curMarker._isIndoorMapOpen = true;
     curMarker.updateIndoorMap();
 };
+/*
+Handler invoked on closing the indoor map
+ */
 ParkItPage.hideIndoorMap = function() {
-    curMarker._isIndoorMapOpen = false;
+    ParkItPage.selectedMarker._isIndoorMapOpen = false;
 };
 
-
+/*
+Marker object holds all information and functions for the pertaining marker
+ */
 var Marker = {};
 Marker = function() {
     this._marker = null;
@@ -230,7 +256,10 @@ Marker = function() {
     this._timer = null;
     this._isIndoorMapOpen = false;
     this._availabilityState = availabilityStateEnum.noStatus;
-
+    /*
+    constructor creating google maps marker and does all the necessary marker functionality such 
+    as storing the marker title etc.
+     */
     this.initialize = function() {
         this._marker = new google.maps.Marker({
             animation: google.maps.Animation.DROP
@@ -328,6 +357,10 @@ Marker = function() {
     this.getDistance = function() {
         return this._place.distance.value;
     };
+    /*
+    Fetches the availability status for the marker(parking place) and
+    recalls itself for every 8 seconds to update the status
+     */
     this.getAvailability = function() {
         if (ParkItPage.ZoomLevel > ParkItPage.defaultRegionZoom) {
             if (this._timer) window.clearTimeout(this._timer);
@@ -346,20 +379,24 @@ Marker = function() {
             });
         }
     };
+    //callback for getAvailability web service
     this.availabilityCallback = function(item, status) {
         if (status === "ok") {
             this._item = item;
             this.setAvail(item.avail);
             this.setTotal(item.total);
             this.setAvailability();
+            //update the indoor map only if opened
             if (this._isIndoorMapOpen) {
                 this.updateIndoorMap();
             }
-            if (this.isFinal) {
+            //computes the best direction only when we get the status of all the markers
+            if (this._isFinal) {
                 this.getRegion().computeBestAvailableDirection();
             }
         }
     };
+    //Sets the availability, icon etc to the marker
     this.setAvailability = function() {
         if (this.getAvail() <= 5) {
             this._availabilityState = availabilityStateEnum.noAvail;
@@ -375,6 +412,7 @@ Marker = function() {
         }
         this.setIcon(image);
     };
+    //updates the marker status to the indoor map
     this.updateIndoorMap = function() {
         for (var i in this._item.parkmap) {
             var j = i.substr(1);
@@ -389,20 +427,28 @@ Marker = function() {
             }
         }
     };
+    //Deletes and clears the marker information from google maps and markers array
     this.destroy = function() {
         if (this._timer) window.clearTimeout(this._timer);
         this.getMarker().setMap(null);
     };
 }
 
+/*
+ParkItRegion is created based on the search, example - if one redoes the search
+new ParkItRegion is created.
+TODO: cache or delete object references of old park regions
+ */
 var ParkItRegion = new Class({
     Implements: [Chain, Events, Options],
     options: {
         markers: []
     },
+    //Contructor
     initialize: function(pos, radius) {
         this.getRegionData(pos, radius);
     },
+    //Fetches the region data by firing web service to backend node server
     getRegionData: function(pos, radius) {
         var currentRegion = this;
         $.ajax({
@@ -425,6 +471,7 @@ var ParkItRegion = new Class({
             }
         });
     },
+    //callback for getRegionData
     regionDataCallback: function(results, status) {
         var deferredObject = $.Deferred();
         var finalB = false;
@@ -432,7 +479,12 @@ var ParkItRegion = new Class({
         if (status === google.maps.places.PlacesServiceStatus.OK) {
             for (var i = 0; i < results.length; i++) {
                 result = results[i];
+                //passes final boolean to the final marker
                 if (i == results.length - 1) finalB = true;
+                /*
+                call to compute distance and duration
+                TODO : https://github.com/nishoknm/park-it/issues/4
+                 */
                 ParkItPage.distanceService.getDistanceMatrix({
                     origins: [ParkItPage.currentPosition],
                     destinations: [result.geometry.location],
@@ -445,6 +497,7 @@ var ParkItRegion = new Class({
         }
         return deferredObject;
     },
+    //callback for getDistanceMatrix service
     distanceServiceCallback: function(result, deferredObject, finalB) {
         var currentRegion = this;
         return function(response, status) {
@@ -452,14 +505,17 @@ var ParkItRegion = new Class({
                 result.distance = response.rows[0].elements[0].distance;
                 result.duration = response.rows[0].elements[0].duration;
                 var marker = currentRegion.createMarker(result);
+                //Pushes all  markers to the current region
                 currentRegion.getMarkers().push(marker);
+                //sets final boolean to the final marker
                 if (finalB) {
-                    marker.isFinal = true;
+                    marker._isFinal = true;
                     deferredObject.resolve();
                 }
             }
         };
     },
+    //Creates place marker
     createMarker: function(place) {
         var placeLoc = place.geometry.location;
         var marker = new Marker();
@@ -474,14 +530,17 @@ var ParkItRegion = new Class({
     getMarkers: function() {
         return this.options.markers;
     },
+    //deletes each marker
     destroy: function() {
         for (var i = 0; i < this.getMarkers().length; i++) {
             this.getMarkers()[i].destroy();
         }
     },
+    //Algorithm for computing best direction
     computeBestAvailableDirection: function() {
         for (var i = 0; i < this.getMarkers().length; i++) {
             var marker = this.getMarkers()[i];
+            //doesnt compute for forced marker or if the current marker is the best 
             if (!this._forceMarker && marker.getAvail() > 0) {
                 if (this._bestMarker != marker) {
                     ParkItPage.calculateAndDisplayRoute(ParkItPage.currentPosition.lat + "," + ParkItPage.currentPosition.lng, marker.getPlace().geometry.location.lat + "," + marker.getPlace().geometry.location.lng);
@@ -493,6 +552,7 @@ var ParkItRegion = new Class({
     }
 });
 
+//callback for google map loading
 function initMap() {
 
     ParkItPage.parkitMap = new google.maps.Map(document.getElementById('map'), {
@@ -502,6 +562,7 @@ function initMap() {
 
     ParkItPage.initialize();
 
+    //autocomplete service from google maps API
     var autocomplete = new google.maps.places.Autocomplete(ParkItPage.autocompleteInput);
     autocomplete.bindTo('bounds', ParkItPage.parkitMap);
 
@@ -560,6 +621,10 @@ function callCurrentLocation() {
     });
 }
 
+/*
+Loads park regions based on position
+Param:pos
+ */
 function loadParkItRegion(pos) {
     if (ParkItPage.currentRegion) {
         ParkItPage.directionsDisplay.setMap(null);
