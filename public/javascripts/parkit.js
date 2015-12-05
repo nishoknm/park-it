@@ -210,18 +210,18 @@ ParkItPage.displayIndoorMap = function() {
     if (!ParkItPage.mySvg) {
         ParkItPage.mySvg = new SVG(document.getElementById('floor3'));
         for (var i = 0; i < 19; i++) {
-            this.mySvg.drawRectangle("col" + 0 + "r" + i, 22, 71 + i * 20, 39, 18, "green", "none", 0);
-            this.mySvg.drawRectangle("col" + 5 + "r" + i, 459, 71 + i * 20, 39, 18, "green", "none", 0);
+            this.mySvg.drawRectangle("col" + 0 + "r" + i, 22, 71 + i * 20, 39, 18, "red", "none", 0);
+            this.mySvg.drawRectangle("col" + 5 + "r" + i, 459, 71 + i * 20, 39, 18, "red", "none", 0);
         }
         for (var i = 0; i < 20; i++) {
             this.mySvg.drawLine(null, 20, 70 + i * 20, 20 + 40, 70 + i * 20, "black", 2);
             this.mySvg.drawLine(null, 460, 70 + i * 20, 460 + 40, 70 + i * 20, "black", 2);
         }
         for (var i = 0; i < 13; i++) {
-            this.mySvg.drawRectangle("col" + 1 + "r" + i, 139, 141 + i * 20, 39, 18, "green", "none", 0);
-            this.mySvg.drawRectangle("col" + 2 + "r" + i, 182, 141 + i * 20, 39, 18, "green", "none", 0);
-            this.mySvg.drawRectangle("col" + 3 + "r" + i, 299, 141 + i * 20, 39, 18, "green", "none", 0);
-            this.mySvg.drawRectangle("col" + 4 + "r" + i, 342, 141 + i * 20, 39, 18, "green", "none", 0);
+            this.mySvg.drawRectangle("col" + 1 + "r" + i, 139, 141 + i * 20, 39, 18, "red", "none", 0);
+            this.mySvg.drawRectangle("col" + 2 + "r" + i, 182, 141 + i * 20, 39, 18, "red", "none", 0);
+            this.mySvg.drawRectangle("col" + 3 + "r" + i, 299, 141 + i * 20, 39, 18, "red", "none", 0);
+            this.mySvg.drawRectangle("col" + 4 + "r" + i, 342, 141 + i * 20, 39, 18, "red", "none", 0);
         }
         for (var i = 0; i < 14; i++) {
             this.mySvg.drawLine(null, 140, 140 + i * 20, 140 + 80, 140 + i * 20, "black", 2);
@@ -414,14 +414,32 @@ Marker = function() {
     };
     //updates the marker status to the indoor map
     this.updateIndoorMap = function() {
+        var r, c;
         for (var i in this._item.parkmap) {
-            var j = i.substr(1);
+            var r = parseInt(i.substr(1));
+            if (r <= 18) c = 0;
+            else if (r > 18 && r <= 31) {
+                r = r - 19;
+                c = 1;
+            } else if (r > 31 && r <= 44) {
+                r = r - 32;
+                c = 2;
+            } else if (r > 44 && r <= 57) {
+                r = r - 45;
+                c = 3;
+            } else if (r > 57 && r <= 70) {
+                r = r - 58;
+                c = 4;
+            } else if (r > 70) {
+                r = r - 71;
+                c = 5;
+            }
             if (this._item.parkmap[i] == 1) {
-                $("#col0r" + j).css({
+                $("#col" + c + "r" + r).css({
                     fill: 'green'
                 });
             } else {
-                $("#col0r" + j).css({
+                $("#col" + c + "r" + r).css({
                     fill: 'red'
                 });
             }

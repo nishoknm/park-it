@@ -13,7 +13,7 @@ router.get('/', function(req, res, next) {
 });
 
 //Mongodb connection using mongodb client : the mangodb service has to be started on the server
-mongoClient.connect("mongodb://localhost:27017/parkit", function(err, db) {
+mongoClient.connect("mongodb://127.0.0.1:27017/parkit", function(err, db) {
     if (err) {
         return console.dir(err);
     }
@@ -21,9 +21,9 @@ mongoClient.connect("mongodb://localhost:27017/parkit", function(err, db) {
 });
 
 /*
-getNearbyPlacesData abstract class for firing request to google place search web service
-recursive request pulling from google places web service (google place ws will support only a maximum of 60 places in increments of 20)
-*/
+ getNearbyPlacesData abstract class for firing request to google place search web service
+ recursive request pulling from google places web service (google place ws will support only a maximum of 60 places in increments of 20)
+ */
 var getDataRecursive = new Class({
     Implements: [Chain, Events, Options],
     options: {
@@ -69,20 +69,20 @@ var getDataRecursive = new Class({
 });
 
 /*
-Route for 'GET' google near by places data
-Query Param: latitude
-Query Param: longitude
-Query Param: radius
-*/
+ Route for 'GET' google near by places data
+ Query Param: latitude
+ Query Param: longitude
+ Query Param: radius
+ */
 router.get("/getData", function(req, res) {
     var getDataRecursiveObj = new getDataRecursive(req.query.latitude, req.query.longitude, req.query.radius, res);
     getDataRecursiveObj.getData();
 });
 
 /*
-Route for fetching availability status for a particular placeID
-Query Param: placeId - google place id
-*/
+ Route for fetching availability status for a particular placeID
+ Query Param: placeId - google place id
+ */
 router.get("/getAvailability", function(req, res) {
     var placeId = {
         status: "ok",
@@ -99,11 +99,11 @@ router.get("/getAvailability", function(req, res) {
 });
 
 /*
-Route for fetching availability status for a particular placeID
-Query Param: placeId - google place id (parking lot)
-Query Param: avail - available spaces
-Query Param: total - total spaces
-*/
+ Route for fetching availability status for a particular placeID
+ Query Param: placeId - google place id (parking lot)
+ Query Param: avail - available spaces
+ Query Param: total - total spaces
+ */
 router.get("/addAvailability", function(req, res) {
     var newData = {
         "placeId": req.query.placeId,
@@ -129,10 +129,59 @@ router.get("/addAvailability", function(req, res) {
 });
 
 /*
-Route for updating availability status for a particular placeID
-Query Param: placeId - google place id (parking lot)
-Query Param: avail - current available spaces
-*/
+ Route for inserting parking slot status for a particular placeID
+ Query Param: parks - string separated by ',' ,which defines the name of the slot
+ */
+router.get("/insertParkers", function(req, res) {
+    var availCollection = dbo.collection('availability');
+    var parks = req.query.parks.split(",");
+    var pMap = {
+        parkmap: {}
+    };
+    for (var i = 0; i < parks.length; i++) {
+        pMap.parkmap[parks[i]] = 0;
+    }
+    pMap = flattenObject(pMap);
+    availCollection.update({
+        placeId: req.query.placeId
+    }, {
+        $set: pMap
+    });
+    res.send("Update fired : " + req.query.placeId);
+});
+
+/*
+ * Flatten Object @gdibble: Inspired by https://gist.github.com/penguinboy/762197
+ *   input:  { 'a':{ 'b':{ 'b2':2 }, 'c':{ 'c2':2, 'c3':3 } } }
+ *   output: { 'a.b.b2':2, 'a.c.c2':2, 'a.c.c3':3 }
+ */
+var flattenObject = function(ob) {
+    var toReturn = {};
+    var flatObject;
+    for (var i in ob) {
+        if (!ob.hasOwnProperty(i)) {
+            continue;
+        }
+        if ((typeof ob[i]) === 'object') {
+            flatObject = flattenObject(ob[i]);
+            for (var x in flatObject) {
+                if (!flatObject.hasOwnProperty(x)) {
+                    continue;
+                }
+                toReturn[i + (!!isNaN(x) ? '.' + x : '')] = flatObject[x];
+            }
+        } else {
+            toReturn[i] = ob[i];
+        }
+    }
+    return toReturn;
+};
+
+/*
+ Route for updating availability status for a particular placeID
+ Query Param: placeId - google place id (parking lot)
+ Query Param: avail - current available spaces
+ */
 router.get("/updateAvailability", function(req, res) {
     var availCollection = dbo.collection('availability');
     availCollection.update({
@@ -146,12 +195,12 @@ router.get("/updateAvailability", function(req, res) {
 });
 
 /*
-Route for adding google place - custom parking lot creation
-Query Param: latitude
-Query Param: longitude
-Query Param: name
-Query Param: address
-*/
+ Route for adding google place - custom parking lot creation
+ Query Param: latitude
+ Query Param: longitude
+ Query Param: name
+ Query Param: address
+ */
 router.get("/addPlaceToGoogle", function(req, res) {
     var requestUrl = 'https://maps.googleapis.com/maps/api/place/add/json?key=AIzaSyC0t-qP46fEA1XERGV8YJN1-B9eszVEdRk';
     var type = "parking";
@@ -188,9 +237,9 @@ router.get("/addPlaceToGoogle", function(req, res) {
 });
 
 /*
-Route for deleting google place - custom parking lot created places only
-Query Param: placeId
-*/
+ Route for deleting google place - custom parking lot created places only
+ Query Param: placeId
+ */
 router.get("/deletePlaceToGoogle", function(req, res) {
     var requestUrl = 'https://maps.googleapis.com/maps/api/place/delete/json?key=AIzaSyC0t-qP46fEA1XERGV8YJN1-B9eszVEdRk';
     var newData = {
@@ -216,9 +265,9 @@ router.get("/deletePlaceToGoogle", function(req, res) {
 });
 
 /*
-Route for fetaching place details - parking lot details
-Query Param: placeId
-*/
+ Route for fetaching place details - parking lot details
+ Query Param: placeId
+ */
 router.get("/getPlaceDetails", function(req, res) {
     var requestUrl = 'https://maps.googleapis.com/maps/api/place/details/json?placeid=' + req.query.placeId + '&key=AIzaSyC0t-qP46fEA1XERGV8YJN1-B9eszVEdRk';
     var options = {
