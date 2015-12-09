@@ -16,6 +16,7 @@ var SVG = new Class({
         myRect.setAttributeNS(null, "stroke", stroke);
         myRect.setAttributeNS(null, "stroke-width", stroke_width);
         this.svg.appendChild(myRect);
+        return myRect;
     },
     //draw a line
     drawLine: function(id, x1, y1, x2, y2, stroke, stroke_width) {
@@ -28,6 +29,7 @@ var SVG = new Class({
         myLine.setAttributeNS(null, "stroke", stroke);
         myLine.setAttributeNS(null, "stroke-width", stroke_width);
         this.svg.appendChild(myLine);
+        return myLine;
     }
 });
 var CustomEvent = new Class({
@@ -208,20 +210,22 @@ for indoor map only once and updates the slots from availabity status
 ParkItPage.displayIndoorMap = function() {
     var curMarker = ParkItPage.selectedMarker;
     if (!ParkItPage.mySvg) {
+        ParkItPage.rectArray = [];
+        ParkItPage.lineArray = [];
         ParkItPage.mySvg = new SVG(document.getElementById('floor3'));
         for (var i = 0; i < 19; i++) {
-            this.mySvg.drawRectangle("col" + 0 + "r" + i, 22, 71 + i * 20, 39, 18, "red", "none", 0);
-            this.mySvg.drawRectangle("col" + 5 + "r" + i, 459, 71 + i * 20, 39, 18, "red", "none", 0);
+            ParkItPage.rectArray.push(this.mySvg.drawRectangle("col" + 0 + "r" + i, 22, 71 + i * 20, 39, 18, "red", "none", 0));
+            ParkItPage.rectArray.push(this.mySvg.drawRectangle("col" + 5 + "r" + i, 459, 71 + i * 20, 39, 18, "red", "none", 0));
         }
         for (var i = 0; i < 20; i++) {
             this.mySvg.drawLine(null, 20, 70 + i * 20, 20 + 40, 70 + i * 20, "black", 2);
             this.mySvg.drawLine(null, 460, 70 + i * 20, 460 + 40, 70 + i * 20, "black", 2);
         }
         for (var i = 0; i < 13; i++) {
-            this.mySvg.drawRectangle("col" + 1 + "r" + i, 139, 141 + i * 20, 39, 18, "red", "none", 0);
-            this.mySvg.drawRectangle("col" + 2 + "r" + i, 182, 141 + i * 20, 39, 18, "red", "none", 0);
-            this.mySvg.drawRectangle("col" + 3 + "r" + i, 299, 141 + i * 20, 39, 18, "red", "none", 0);
-            this.mySvg.drawRectangle("col" + 4 + "r" + i, 342, 141 + i * 20, 39, 18, "red", "none", 0);
+            ParkItPage.rectArray.push(this.mySvg.drawRectangle("col" + 1 + "r" + i, 139, 141 + i * 20, 39, 18, "red", "none", 0));
+            ParkItPage.rectArray.push(this.mySvg.drawRectangle("col" + 2 + "r" + i, 182, 141 + i * 20, 39, 18, "red", "none", 0));
+            ParkItPage.rectArray.push(this.mySvg.drawRectangle("col" + 3 + "r" + i, 299, 141 + i * 20, 39, 18, "red", "none", 0));
+            ParkItPage.rectArray.push(this.mySvg.drawRectangle("col" + 4 + "r" + i, 342, 141 + i * 20, 39, 18, "red", "none", 0));
         }
         for (var i = 0; i < 14; i++) {
             this.mySvg.drawLine(null, 140, 140 + i * 20, 140 + 80, 140 + i * 20, "black", 2);
@@ -236,6 +240,15 @@ Handler invoked on closing the indoor map
  */
 ParkItPage.hideIndoorMap = function() {
     ParkItPage.selectedMarker._isIndoorMapOpen = false;
+};
+ParkItPage.flushRects = function() {
+    if (ParkItPage.rectArray) {
+        for (var i = 0; i < ParkItPage.rectArray.length; i++) {
+            $(ParkItPage.rectArray[i]).css({
+                fill: 'red'
+            });
+        };
+    }
 };
 
 /*
@@ -414,6 +427,7 @@ Marker = function() {
     };
     //updates the marker status to the indoor map
     this.updateIndoorMap = function() {
+        ParkItPage.flushRects();
         var r, c;
         for (var i in this._item.parkmap) {
             var r = parseInt(i.substr(1));
