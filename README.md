@@ -23,8 +23,29 @@ Parking assistance:
   Allows user to find a parking lot with empty spaces based on his location instead of running in circles or
   parking in no parking spaces.
 
-# Contributors : 
-  * Nishok Mohanasamy
-  * Zhisong Ge
-  * Krishna
+# Architecture:
+	Frameworks:
+		Components:
+			-Client:
+				UI: Pure HTMLs, CSSs and JSs
+				Structure (Controller and Model): 
+					JQUERY:
+						-AJAX calls
+						-Deferred chaining
+					MooTools:
+						-OOPS in JS
+			-Server:
+				Web server:
+					Node js server
+			-Database:
+				MongoDb
 
+	Core:
+		Google APIs:
+			Maps Javascript
+			Places Web services
+			Direction services
+			Distance matrix services
+		MooTools classes:
+			Park regions
+			Markers
