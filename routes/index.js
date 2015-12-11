@@ -113,7 +113,7 @@ router.get("/getAllPlaceIds", function (req, res) {
  */
 router.get("/getAllAvailability", function (req, res) {
     var availCollection = dbo.collection('availability');
-    availCollection.find().toArray(function(err, result) {
+    availCollection.find().toArray(function (err, result) {
         res.send(result);
     });
 });
@@ -123,7 +123,7 @@ router.get("/getAllAvailability", function (req, res) {
  */
 router.get("/removePlace", function (req, res) {
     var availCollection = dbo.collection('availability');
-    availCollection.remove({placeId:req.query.placeId});
+    availCollection.remove({placeId: req.query.placeId});
     res.send("done");
 });
 
@@ -160,11 +160,12 @@ router.get("/addAvailability", function (req, res) {
 router.get("/insertParkers", function (req, res) {
     var availCollection = dbo.collection('availability');
     var parks = req.query.parks.split(",");
+    var pStatus = req.query.pStatus.split(",");
     var pMap = {
         parkmap: {}
     };
     for (var i = 0; i < parks.length; i++) {
-        pMap.parkmap[parks[i]] = 1;
+        pMap.parkmap[parks[i]] = pStatus[i];
     }
     pMap = flattenObject(pMap);
     availCollection.update({
