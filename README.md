@@ -51,4 +51,4 @@ Parking assistance:
 			Markers
 			
 # Demo
-![Alt text](artifacts\images\ParkItGIF.gif)
+![Alt text](/artifacts/images/ParkItGIF.gif)
