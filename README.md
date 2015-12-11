@@ -1,5 +1,9 @@
 # Park-It
     Javscript (node.js) based parking application
+Parking assistance:
+* 2000m parking places with availability status.
+* Auto direction/navigation to the nearest parking slot based on availability.
+* Indoor parking map, for more parking efficiency.
 
 # Proposal:
     Web based parking assistance.
