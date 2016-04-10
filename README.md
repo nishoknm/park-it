@@ -53,7 +53,8 @@ Parking assistance:
 # Technical Document:
 	Main Page:
 		-index.html (park-it\views\index.html)
-			<script src="https://maps.googleapis.com/maps/api/js?key=<KEY>&signed_in=true&libraries=places&callback=initMap" async defer></script>
+			<script src="https://maps.googleapis.com/maps/api/js?key=<KEY>&signed_in=true&libraries=places&callback
+			=initMap" async defer></script>
 
 			The above script loads the google map on the body and calls the callback "initMap" after loading the map.
 			The initMap initializes ParkItPage , which is a utility and base class available throughout the lifecycle
@@ -74,8 +75,8 @@ Parking assistance:
 	Main Javascript:
 		-parkit.js (park-it\public\javascripts\parkit.js)
 		This js contains the following important classes:
-			-ParkItPage class, which is standalone utility class having static methods such as calculateAndDisplayRoute,
-			openInfoWindow et Cetera, is created only once during the entire lifecycle the web page.
+			-ParkItPage class, which is standalone utility class having static methods such as openInfoWindow,
+			calculateAndDisplayRoute, et Cetera, is created only once during the entire lifecycle the web page.
 			-ParkItRegion class, which is the main holder class created on every zoom changed or new location change,
 			holds the API (getRegionData) for fetching parking information using google places nearby search AJAX and
 			the API (createMarker) for creating markers on maps.
@@ -84,9 +85,9 @@ Parking assistance:
 
 	Main Server Page:
 		-index.js (park-it\routes\index.js)
-		This is the main router for the backend server which processes all the AJAX request from the front-end including 
-		google API AJAX calls. Google's Places API AJAX calls are re-directed to this route, then this route handles these
-		requests with fail back.
+		This is the main router for the backend server which processes all the AJAX request from the front-end 
+		including google API AJAX calls. Google's Places API AJAX calls are re-directed to this route, then this
+		route handles these requests with fail back.
 
 		This js contains the following GET requests:
 		-getData
