@@ -292,7 +292,7 @@ router.get("/deletePlaceToGoogle", function (req, res) {
 });
 
 /*
- Route for fetaching place details - parking lot details
+ Route for fetching place details - parking lot details
  Query Param: placeId
  */
 router.get("/getPlaceDetails", function (req, res) {
