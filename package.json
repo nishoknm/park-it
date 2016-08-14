@@ -11,6 +11,7 @@
     "request": "latest",
     "mootools": "latest",
     "express": "latest",
-    "mongodb": "latest"
+    "mongodb": "latest",
+    "http": "latest"
   }
 }
