@@ -427,6 +427,7 @@ Marker = function() {
     };
     //updates the marker status to the indoor map
     this.updateIndoorMap = function() {
+        if(this._item == undefined) return;
         ParkItPage.flushRects();
         var r, c;
         for (var i in this._item.parkmap) {
@@ -610,12 +611,13 @@ function initMap() {
         // If the place has a geometry, then present it on a map.
         if (place.geometry.viewport) {
             ParkItPage.parkitMap.fitBounds(place.geometry.viewport);
-        } else {
-            ParkItPage.currentPosition = place.geometry.location.toJSON();
-            ParkItPage.parkitMap.setCenter(place.geometry.location);
-            ParkItPage.parkitMap.setZoom(15);
-            loadParkItRegion(ParkItPage.currentPosition);
         }
+
+        ParkItPage.currentPosition = place.geometry.location.toJSON();
+        ParkItPage.parkitMap.setCenter(place.geometry.location);
+        ParkItPage.parkitMap.setZoom(15);
+        loadParkItRegion(ParkItPage.currentPosition);
+
         ParkItPage.autocompleteMarker.setPosition(place.geometry.location);
         ParkItPage.autocompleteMarker.setVisible(true);
         ParkItPage.openInfoWindow('<div class="info" style="text-align:center">' + place.name + '</div>', ParkItPage.autocompleteMarker);
@@ -635,10 +637,25 @@ function initMap() {
         ParkItPage.customEvents.dispatch("viewport_change");
         return;
     });
-    callCurrentLocation();
+
+    callMontclairLocation();
+}
+
+function callMontclairLocation() {
+    ParkItPage.autocompleteInput.value = null;
+    ParkItPage.autocompleteMarker.setPosition(ParkItPage.currentPosition);
+    ParkItPage.autocompleteMarker.setVisible(true);
+    ParkItPage.openInfoWindow('<div class="info" style="text-align:center">Your Current Location</div>', ParkItPage.autocompleteMarker);
+    loadParkItRegion(ParkItPage.currentPosition);
 }
 
 function callCurrentLocation() {
+    var optionsPosition = {
+        enableHighAccuracy: false,
+        timeout: 5000,
+        maximumAge: Infinity
+    };
+
     //Current location
     navigator.geolocation.getCurrentPosition(function(pos) {
         ParkItPage.currentPosition = {
@@ -650,7 +667,7 @@ function callCurrentLocation() {
         ParkItPage.autocompleteMarker.setVisible(true);
         ParkItPage.openInfoWindow('<div class="info" style="text-align:center">Your Current Location</div>', ParkItPage.autocompleteMarker);
         loadParkItRegion(ParkItPage.currentPosition);
-    });
+    }, null, optionsPosition);
 }
 
 /*
@@ -659,9 +676,12 @@ Param:pos
  */
 function loadParkItRegion(pos) {
     if (ParkItPage.currentRegion) {
-        ParkItPage.directionsDisplay.setMap(null);
-        ParkItPage.directionsDisplay.setPanel(null)
         ParkItPage.currentRegion.destroy();
+    }
+    ParkItPage.directionsDisplay.setMap(null);
+    ParkItPage.directionsDisplay.setPanel(null);
+    if (!$("#pDetails").hasClass("inactive")) {
+        $("#pDetails").toggleClass("inactive");
     }
     pos = pos ? pos : ParkItPage.currentPosition;
     ParkItPage.parkitMap.setCenter(pos);

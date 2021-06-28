@@ -3,21 +3,32 @@ var router = express.Router();
 var request = require('request');
 var mootools = require("mootools");
 var mongoClient = require('mongodb').MongoClient;
+const fs = require('fs');
 
-//db Object
-var dbo;
+const google_api_key = "AIzaSyAcU_WRH26ojanxF29jOApo0EKuSe4JMN0";
+
+// db Object
+let dbo;
+
+// Load client secrets from a local file.
+fs.readFile('credentials.json', (err, content) => {
+    if (err) return console.log('Error loading client secret file:', err);
+    // Authorize a client with credentials, then call the Gmail API.
+    let credentials = JSON.parse(content);
+    let uri = "mongodb+srv://"+credentials.dba_user+":"+credentials.dba_pass+"@cluster0.nzzxb.mongodb.net/parkit?retryWrites=true&w=majority";
+
+    //Mongodb connection using mongodb client : the mangodb service has to be started on the server
+    mongoClient.connect(uri, function (err, client) {
+        if (err) {
+            return console.dir(err);
+        }
+        dbo = client.db("parkit");
+    });
+});
 
 /* GET home page. */
 router.get('/', function (req, res, next) {
     res.sendFile('index.html');
-});
-
-//Mongodb connection using mongodb client : the mangodb service has to be started on the server
-mongoClient.connect("mongodb://127.0.0.1:27017/parkit", function (err, db) {
-    if (err) {
-        return console.dir(err);
-    }
-    dbo = db;
 });
 
 /*
@@ -30,8 +41,8 @@ var getDataRecursive = new Class({
         results: []
     },
     initialize: function (lat, lon, rad, res) {
-        this.requestUrl = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=' + lat + ',' + lon + '&radius=' + rad + '&types=parking&key=AIzaSyC0t-qP46fEA1XERGV8YJN1-B9eszVEdRk';
-        this.url = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=' + lat + ',' + lon + '&radius=' + rad + '&types=parking&key=AIzaSyC0t-qP46fEA1XERGV8YJN1-B9eszVEdRk';
+        this.requestUrl = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=' + lat + ',' + lon + '&radius=' + rad + '&types=parking&key=' + google_api_key;
+        this.url = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=' + lat + ',' + lon + '&radius=' + rad + '&types=parking&key=' + google_api_key;
         this.res = res;
     },
     getResults: function () {
@@ -228,7 +239,7 @@ router.get("/updateAvailability", function (req, res) {
  Query Param: address
  */
 router.get("/addPlaceToGoogle", function (req, res) {
-    var requestUrl = 'https://maps.googleapis.com/maps/api/place/add/json?key=AIzaSyC0t-qP46fEA1XERGV8YJN1-B9eszVEdRk';
+    var requestUrl = 'https://maps.googleapis.com/maps/api/place/add/json?key=' + google_api_key;
     var type = "parking";
     if (req.query.type) {
         type = req.query.type;
@@ -268,7 +279,7 @@ router.get("/addPlaceToGoogle", function (req, res) {
  Query Param: placeId
  */
 router.get("/deletePlaceToGoogle", function (req, res) {
-    var requestUrl = 'https://maps.googleapis.com/maps/api/place/delete/json?key=AIzaSyC0t-qP46fEA1XERGV8YJN1-B9eszVEdRk';
+    var requestUrl = 'https://maps.googleapis.com/maps/api/place/delete/json?key=' + google_api_key;
     var newData = {
         "place_id": req.query.placeId
     };
@@ -296,7 +307,7 @@ router.get("/deletePlaceToGoogle", function (req, res) {
  Query Param: placeId
  */
 router.get("/getPlaceDetails", function (req, res) {
-    var requestUrl = 'https://maps.googleapis.com/maps/api/place/details/json?placeid=' + req.query.placeId + '&key=AIzaSyC0t-qP46fEA1XERGV8YJN1-B9eszVEdRk';
+    var requestUrl = 'https://maps.googleapis.com/maps/api/place/details/json?placeid=' + req.query.placeId + '&key=' + google_api_key;
     var options = {
         Host: 'maps.googleapis.com',
         uri: requestUrl,
