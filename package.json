@@ -8,14 +8,11 @@
   },
   "dependencies": {
     "debug": "~2.2.0",
-    "fs": "latest",
-    "request": "latest",
-    "request-promise": "^4.2.6",
     "express": "latest",
+    "fs": "latest",
+    "http": "latest",
     "mongodb": "latest",
-    "http": "latest"
-  },
-  "devDependencies": {
-    "request-promise": "^4.2.6"
+    "node-fetch": "^2.6.1",
+    "request": "latest"
   }
 }

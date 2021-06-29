@@ -1,10 +1,11 @@
-var express = require('express');
-var router = express.Router();
-var request = require('request');
-var requestPromise = require("request-promise");
-var mongoClient = require('mongodb').MongoClient;
+const express = require('express');
+const router = express.Router();
+const request = require('request');
+const fetch = require('node-fetch');
+const mongoClient = require('mongodb').MongoClient;
 const fs = require('fs');
 
+const google_url = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=';
 const google_api_key = "AIzaSyAcU_WRH26ojanxF29jOApo0EKuSe4JMN0";
 
 // db Object
@@ -35,24 +36,21 @@ router.get('/', function (req, res, next) {
  getNearbyPlacesData abstract class for firing request to google place search web service
  recursive request pulling from google places web service (google place ws will support only a maximum of 60 places in increments of 20)
  */
-const getGoogleMarkers = async function(lat, lon, rad, token) {
+const getGoogleMarkersFetch = async function(lat, lon, rad, token) {
     // Setting URL and headers for request
-    let options = {
-        url : token == undefined ? 'https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=' + lat + ',' + lon + '&radius=' + rad + '&types=parking&key=' + google_api_key :
-            'https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=' + lat + ',' + lon + '&radius=' + rad + '&types=parking&key=' + google_api_key + "&pagetoken=" + token,
-        headers: {
-            'User-Agent': 'request'
-        }
-    };
+    let url = token == undefined ? google_url + lat + ',' + lon + '&radius=' + rad + '&types=parking&key=' + google_api_key :
+        google_url + lat + ',' + lon + '&radius=' + rad + '&types=parking&key=' + google_api_key + "&pagetoken=" + token
 
-    let content = JSON.parse(await requestPromise(options));
+    let response = await fetch(url);
+    let content = await response.json();
     // retry till you get the results because google takes time to process the next paginated data, refer https://developers.google.com/maps/documentation/places/web-service/search
     while(content.status == "INVALID_REQUEST"){
-        content = JSON.parse(await requestPromise(options));
+        response = await fetch(url);
+        content = await response.json();
     }
     // if next page token exists, fetch the next set
     if (content.next_page_token != undefined) {
-        let localResults = await getGoogleMarkers(lat, lon, rad, content.next_page_token);
+        let localResults = await getGoogleMarkersFetch(lat, lon, rad, content.next_page_token);
 
         // create a copy of the result set and return
         return [...content.results, ...localResults];
@@ -68,7 +66,7 @@ const getGoogleMarkers = async function(lat, lon, rad, token) {
  Query Param: radius
  */
 router.get("/getData", async function (req, res) {
-    let result = await getGoogleMarkers(req.query.latitude, req.query.longitude, req.query.radius);
+    let result = await getGoogleMarkersFetch(req.query.latitude, req.query.longitude, req.query.radius);
     console.log("Total markers fetched -- > " + result.length);
     res.send({"results": result, status: "OK"});
 });
