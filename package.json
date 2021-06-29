@@ -10,9 +10,12 @@
     "debug": "~2.2.0",
     "fs": "latest",
     "request": "latest",
-    "mootools": "latest",
+    "request-promise": "^4.2.6",
     "express": "latest",
     "mongodb": "latest",
     "http": "latest"
+  },
+  "devDependencies": {
+    "request-promise": "^4.2.6"
   }
 }

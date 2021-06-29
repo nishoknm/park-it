@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var request = require('request');
-var mootools = require("mootools");
+var requestPromise = require("request-promise");
 var mongoClient = require('mongodb').MongoClient;
 const fs = require('fs');
 
@@ -35,49 +35,31 @@ router.get('/', function (req, res, next) {
  getNearbyPlacesData abstract class for firing request to google place search web service
  recursive request pulling from google places web service (google place ws will support only a maximum of 60 places in increments of 20)
  */
-var getDataRecursive = new Class({
-    Implements: [Chain, Events, Options],
-    options: {
-        results: []
-    },
-    initialize: function (lat, lon, rad, res) {
-        this.requestUrl = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=' + lat + ',' + lon + '&radius=' + rad + '&types=parking&key=' + google_api_key;
-        this.url = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=' + lat + ',' + lon + '&radius=' + rad + '&types=parking&key=' + google_api_key;
-        this.res = res;
-    },
-    getResults: function () {
-        return this.options.results;
-    },
-    getData: function () {
-        console.log('fetching... ' + this.requestUrl);
-        request(this.requestUrl, this.callback.bind(this));
-    },
-    callback: function (error, response, body) {
-        var body = JSON.parse(body),
-            results = body.results;
+const getGoogleMarkers = async function(lat, lon, rad, token) {
+    // Setting URL and headers for request
+    let options = {
+        url : token == undefined ? 'https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=' + lat + ',' + lon + '&radius=' + rad + '&types=parking&key=' + google_api_key :
+            'https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=' + lat + ',' + lon + '&radius=' + rad + '&types=parking&key=' + google_api_key + "&pagetoken=" + token,
+        headers: {
+            'User-Agent': 'request'
+        }
+    };
 
-        if (error || body.error) {
-            this.dataCallback(error || body.error);
-        } else {
-            this.getResults().push(...results);
-            if (body.next_page_token) {
-                this.requestUrl = this.url + "&pagetoken=" + body.next_page_token;
-                console.log(body.next_page_token);
-                //recursive callback for next 20 dataset from google
-                setTimeout(this.getData.bind(this), 2000);
-            } else {
-                body.results = this.getResults();
-                this.dataCallback(null, body);
-            }
-        }
-    },
-    dataCallback: function (err, body) {
-        if (err) this.res.send(err);
-        else {
-            this.res.send(body);
-        }
+    let content = JSON.parse(await requestPromise(options));
+    // retry till you get the results because google takes time to process the next paginated data, refer https://developers.google.com/maps/documentation/places/web-service/search
+    while(content.status == "INVALID_REQUEST"){
+        content = JSON.parse(await requestPromise(options));
     }
-});
+    // if next page token exists, fetch the next set
+    if (content.next_page_token != undefined) {
+        let localResults = await getGoogleMarkers(lat, lon, rad, content.next_page_token);
+
+        // create a copy of the result set and return
+        return [...content.results, ...localResults];
+    } else {
+        return content.results;
+    }
+}
 
 /*
  Route for 'GET' google near by places data
@@ -85,9 +67,10 @@ var getDataRecursive = new Class({
  Query Param: longitude
  Query Param: radius
  */
-router.get("/getData", function (req, res) {
-    var getDataRecursiveObj = new getDataRecursive(req.query.latitude, req.query.longitude, req.query.radius, res);
-    getDataRecursiveObj.getData();
+router.get("/getData", async function (req, res) {
+    let result = await getGoogleMarkers(req.query.latitude, req.query.longitude, req.query.radius);
+    console.log("Total markers fetched -- > " + result.length);
+    res.send({"results": result, status: "OK"});
 });
 
 /*
@@ -266,7 +249,6 @@ router.get("/addPlaceToGoogle", function (req, res) {
             console.log(typeof(body));
             if (body.status == 'OK') {
                 res.send("Added " + req.query.name + "\n PlaceID :" + body.place_id);
-                ;
             } else {
                 res.send(" Failed..!!! ");
             }
